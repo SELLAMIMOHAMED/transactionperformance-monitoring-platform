@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Importation des données</title>
+
+    <style>
+
+        body{
+            font-family: Arial;
+            padding:40px;
+        }
+
+        .card{
+            border:1px solid #ddd;
+            padding:20px;
+            margin-bottom:20px;
+            border-radius:10px;
+        }
+
+    </style>
+
+</head>
+<body>
+
+<h1>Importation des données</h1>
+
+<div class="card">
+
+    <form method="POST" enctype="multipart/form-data">
+
+        <input
+            type="file"
+            name="file"
+            required
+        >
+
+        <button type="submit">
+            Importer
+        </button>
+
+    </form>
+
+</div>
+
+{% if file_name %}
+
+<div class="card">
+
+    <h3>Informations du fichier</h3>
+
+    <p>
+        <strong>Nom du fichier :</strong>
+        {{ file_name }}
+    </p>
+
+    <p>
+        <strong>Nombre de lignes :</strong>
+        {{ rows }}
+    </p>
+
+    <p>
+        <strong>Nombre de colonnes :</strong>
+        {{ cols }}
+    </p>
+
+</div>
+
+<div class="card">
+
+    <h3>Aperçu des données</h3>
+
+    {{ data|safe }}
+
+</div>
+
+{% endif %}
+
+
+</body>
+</html>
