@@ -1,21 +1,392 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+
 <head>
-    <title>Contrôle qualité</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contrôle qualité — Plateforme de Suivi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; margin: 0; }
+
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+            background: #ffffff; border-right: 1px solid #e8e8e8;
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-logo { padding: 18px 20px 14px; border-bottom: 1px solid #e8e8e8; }
+        .logo-badge { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #1a1a1a; }
+        .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: #185FA5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .logo-icon i { font-size: 17px; color: #E6F1FB; }
+        .sidebar-logo p { font-size: 11px; color: #888; margin-top: 5px; margin-bottom: 0; line-height: 1.4; }
+        .sidebar-section { padding: 14px 20px 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin: 1px 8px; border-radius: 8px; font-size: 13.5px; color: #555; text-decoration: none; transition: background 0.15s, color 0.15s; }
+        .nav-item:hover { background: #f4f6f9; color: #1a1a1a; text-decoration: none; }
+        .nav-item.active { background: #E6F1FB; color: #185FA5; font-weight: 500; }
+        .nav-item i { font-size: 18px; flex-shrink: 0; }
+        .sidebar-bottom { margin-top: auto; padding: 12px; border-top: 1px solid #e8e8e8; }
+        .user-row { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; padding: 8px 10px; border-radius: 8px; text-decoration: none; transition: background 0.15s; }
+        .user-row:hover { background: #f4f6f9; }
+        .avatar { width: 34px; height: 34px; border-radius: 50%; background: #E6F1FB; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #185FA5; flex-shrink: 0; }
+        .user-info { flex: 1; }
+        .user-info .user-name { font-size: 13px; font-weight: 500; color: #1a1a1a; margin: 0; }
+        .user-info .user-role { font-size: 11px; color: #999; }
+        .logout-icon { font-size: 17px; color: #ccc; }
+        .logout-row { background: #ffffff; border: 1px solid #185FA5; color: #185FA5; justify-content: center; }
+        .logout-row:hover { background: #bbbbbb; border: 1px solid #ffffff; }
+
+        /* ===== MAIN ===== */
+        .main-wrapper { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
+
+        /* ===== TOPBAR ===== */
+        .topbar { background: #ffffff; border-bottom: 1px solid #e8e8e8; padding: 0 28px; height: 58px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: sticky; top: 0; z-index: 50; }
+        .topbar-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0; }
+        .topbar-sub { font-size: 12px; color: #999; }
+        .btn-topbar { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d5d5d5; background: transparent; color: #555; transition: background 0.15s; text-decoration: none; }
+        .btn-topbar.primary { background: #185FA5; border-color: #185FA5; color: #ffffff; }
+        .btn-topbar.primary:hover { background: #0e4a82; color: #fff; }
+        .btn-topbar i { font-size: 16px; }
+
+        /* ===== CONTENT ===== */
+        .content { padding: 28px; flex: 1; }
+
+        /* ===== BANNER ===== */
+        .welcome-banner { background: #185FA5; border-radius: 14px; padding: 26px 30px; margin-bottom: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .welcome-banner h2 { font-size: 19px; font-weight: 600; color: #E6F1FB; margin-bottom: 5px; }
+        .welcome-banner p { font-size: 13px; color: #B5D4F4; margin: 0; }
+        .btn-white { display: flex; align-items: center; gap: 7px; background: #ffffff; color: #185FA5; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; white-space: nowrap; text-decoration: none; transition: background 0.15s; }
+        .btn-white:hover { background: #E6F1FB; color: #185FA5; text-decoration: none; }
+        .btn-white i { font-size: 16px; }
+
+        /* ===== KPI GRID ===== */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
+        .kpi-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; }
+        .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .kpi-label { font-size: 12px; color: #888; font-weight: 500; }
+        .kpi-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .kpi-icon i { font-size: 17px; }
+        .kpi-icon.blue   { background: #E6F1FB; } .kpi-icon.blue   i { color: #185FA5; }
+        .kpi-icon.green  { background: #EAF3DE; } .kpi-icon.green  i { color: #3B6D11; }
+        .kpi-icon.amber  { background: #FAEEDA; } .kpi-icon.amber  i { color: #854F0B; }
+        .kpi-icon.red    { background: #FAECEC; } .kpi-icon.red    i { color: #993C1D; }
+        .kpi-icon.purple { background: #EEEDFE; } .kpi-icon.purple i { color: #534AB7; }
+        .kpi-value { font-size: 24px; font-weight: 600; color: #1a1a1a; }
+        .kpi-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; }
+
+        /* ===== SYNTHÈSE ===== */
+        .synthese-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; margin-bottom: 26px; }
+        .synthese-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        .synthese-item { display: flex; flex-direction: column; gap: 4px; }
+        .synthese-item-label { font-size: 11px; color: #999; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; }
+        .synthese-item-value { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+        .synthese-item-sub { font-size: 11px; color: #aaa; }
+        .quality-bar-wrap { margin-top: 18px; }
+        .quality-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #555; margin-bottom: 6px; }
+        .quality-bar { height: 8px; border-radius: 20px; background: #e8e8e8; overflow: hidden; }
+        .quality-bar-fill { height: 100%; border-radius: 20px; transition: width 0.6s ease; }
+        .quality-bar-fill.good   { background: #639922; }
+        .quality-bar-fill.medium { background: #BA7517; }
+        .quality-bar-fill.bad    { background: #993C1D; }
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+        .status-pill.good   { background: #EAF3DE; color: #3B6D11; }
+        .status-pill.medium { background: #FAEEDA; color: #854F0B; }
+        .status-pill.bad    { background: #FAECEC; color: #993C1D; }
+
+        /* ===== RECOMMANDATIONS ===== */
+        .reco-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; }
+        .reco-list { display: flex; flex-direction: column; gap: 12px; }
+        .reco-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 10px; background: #f8f9fb; border: 1px solid #eee; }
+        .reco-item.warning { background: #FFFBF2; border-color: #F5E0B5; }
+        .reco-item.danger  { background: #FFF5F5; border-color: #F5C6C6; }
+        .reco-item.success { background: #F4FAF0; border-color: #C6E5A8; }
+        .reco-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .reco-icon.warning { background: #FAEEDA; } .reco-icon.warning i { color: #854F0B; }
+        .reco-icon.danger  { background: #FAECEC; } .reco-icon.danger  i { color: #993C1D; }
+        .reco-icon.success { background: #EAF3DE; } .reco-icon.success i { color: #3B6D11; }
+        .reco-icon i { font-size: 17px; }
+        .reco-text-title { font-size: 13px; font-weight: 600; color: #1a1a1a; margin-bottom: 2px; }
+        .reco-text-desc  { font-size: 12px; color: #777; line-height: 1.5; margin: 0; }
+
+        /* ===== STATUS DOT ===== */
+        .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .dot.green { background: #639922; }
+        .dot.amber { background: #BA7517; }
+        .dot.red   { background: #993C1D; }
+    </style>
 </head>
+
 <body>
 
-<h1>Contrôle qualité</h1>
+<!-- ========== SIDEBAR ========== -->
+<div class="sidebar">
 
-<p>Total lignes : {{ total_rows }}</p>
+    <div class="sidebar-logo">
+        <div class="logo-badge">
+            <div class="logo-icon"><i class="ti ti-chart-bar"></i></div>
+            Suivi & Analyse
+        </div>
+        <p>Performance des transactions</p>
+    </div>
 
-<p>Valeurs manquantes : {{ missing_values }}</p>
+    <div class="sidebar-section">Navigation</div>
 
-<p>Doublons : {{ duplicates }}</p>
+    <a href="/home" class="nav-item">
+        <i class="ti ti-home"></i> Accueil
+    </a>
 
-<p>Montants négatifs : {{ negative_amounts }}</p>
+    {% if session.role == "admin" %}
+    <a href="/import" class="nav-item">
+        <i class="ti ti-upload"></i> Importation
+    </a>
+    {% endif %}
 
-<p>Lignes valides : {{ valid_rows }}</p>
+    {% if session.role in ["admin", "analyste"] %}
+    <a href="/quality" class="nav-item active">
+        <i class="ti ti-shield-check"></i> Contrôle qualité
+    </a>
+    <a href="/kpi" class="nav-item">
+        <i class="ti ti-chart-pie"></i> KPI
+    </a>
+    {% endif %}
 
+    <a href="/dashboard" class="nav-item">
+        <i class="ti ti-layout-dashboard"></i> Dashboard
+    </a>
+
+    {% if session.role == "admin" %}
+    <a href="/reporting" class="nav-item">
+        <i class="ti ti-file-text"></i> Reporting PDF
+    </a>
+    {% endif %}
+
+    <div class="sidebar-bottom">
+        {% if session.get("username") %}
+        <a href="/info" class="user-row">
+            <div class="avatar">{{ session.username[:2].upper() }}</div>
+            <div class="user-info">
+                <p class="user-name">{{ session.username }}</p>
+                <span class="user-role">
+                    {% if session.role == "admin" %}
+                        Administrateur
+                    {% elif session.role == "analyste" %}
+                        Analyste
+                    {% elif session.role == "manager" %}
+                        Manager
+                    {% else %}
+                        Utilisateur
+                    {% endif %}
+                </span>
+            </div>
+        </a>
+        {% endif %}
+        <a href="/logout" class="nav-item logout-row">
+            <i class="ti ti-logout"></i> Déconnexion
+        </a>
+    </div>
+
+</div>
+
+<!-- ========== MAIN ========== -->
+<div class="main-wrapper">
+
+    <div class="topbar">
+        <div>
+            <p class="topbar-title">Contrôle qualité</p>
+            <span class="topbar-sub">Analyse automatique de la qualité des données importées</span>
+        </div>
+        {% if session.role == "admin" %}
+        <div class="d-flex gap-2">
+            <a href="/import" class="btn-topbar primary">
+                <i class="ti ti-upload"></i> Importer des données
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="content">
+
+        <!-- BANNER -->
+        <div class="welcome-banner">
+            <div>
+                <h2>Contrôle qualité des données</h2>
+                <p>Analysez automatiquement la qualité des données importées et identifiez les anomalies.</p>
+            </div>
+            {% if session.role in ["admin", "analyste"] %}
+            <a href="/import" class="btn-white">
+                <i class="ti ti-refresh"></i> Relancer l'analyse
+            </a>
+            {% endif %}
+        </div>
+
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Total des lignes</span>
+                    <div class="kpi-icon blue"><i class="ti ti-table"></i></div>
+                </div>
+                <div class="kpi-value">{{ total_rows if total_rows is defined else '—' }}</div>
+                <div class="kpi-sub">Lignes dans le fichier importé</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Valeurs manquantes</span>
+                    <div class="kpi-icon amber"><i class="ti ti-alert-circle"></i></div>
+                </div>
+                <div class="kpi-value">{{ missing_values if missing_values is defined else '—' }}</div>
+                <div class="kpi-sub">Cellules vides détectées</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Doublons</span>
+                    <div class="kpi-icon purple"><i class="ti ti-copy"></i></div>
+                </div>
+                <div class="kpi-value">{{ duplicates if duplicates is defined else '—' }}</div>
+                <div class="kpi-sub">Lignes dupliquées détectées</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Montants négatifs</span>
+                    <div class="kpi-icon red"><i class="ti ti-trending-down"></i></div>
+                </div>
+                <div class="kpi-value">{{ negative_amounts if negative_amounts is defined else '—' }}</div>
+                <div class="kpi-sub">Transactions à montant invalide</div>
+            </div>
+
+        </div>
+
+        <!-- SYNTHÈSE -->
+        <div class="section-title">Synthèse de la qualité</div>
+        <div class="synthese-card">
+            <div class="synthese-grid">
+                <div class="synthese-item">
+                    <span class="synthese-item-label">Lignes valides</span>
+                    <span class="synthese-item-value">{{ valid_rows if valid_rows is defined else '—' }}</span>
+                    <span class="synthese-item-sub">Lignes sans anomalie</span>
+                </div>
+                <div class="synthese-item">
+                    <span class="synthese-item-label">Taux de qualité</span>
+                    {% if total_rows is defined and total_rows > 0 and valid_rows is defined %}
+                        {% set quality_rate = (valid_rows / total_rows * 100) | round(1) %}
+                    {% else %}
+                        {% set quality_rate = 0 %}
+                    {% endif %}
+                    <span class="synthese-item-value">{{ quality_rate }}%</span>
+                    <span class="synthese-item-sub">Score de qualité global</span>
+                </div>
+                <div class="synthese-item">
+                    <span class="synthese-item-label">Statut global</span>
+                    <br>
+                    {% if quality_rate >= 80 %}
+                        <span class="status-pill good"><span class="dot green"></span> Bon</span>
+                    {% elif quality_rate >= 50 %}
+                        <span class="status-pill medium"><span class="dot amber"></span> Moyen</span>
+                    {% else %}
+                        <span class="status-pill bad"><span class="dot red"></span> Faible</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="quality-bar-wrap">
+                <div class="quality-bar-label">
+                    <span>Qualité des données</span>
+                    <span>{{ quality_rate }}%</span>
+                </div>
+                <div class="quality-bar">
+                    <div class="quality-bar-fill {% if quality_rate >= 80 %}good{% elif quality_rate >= 50 %}medium{% else %}bad{% endif %}"
+                         style="width: {{ quality_rate }}%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RECOMMANDATIONS -->
+        <div class="section-title">Recommandations</div>
+        <div class="reco-card">
+            <div class="reco-list">
+
+                {% if missing_values is defined and missing_values > 0 %}
+                <div class="reco-item warning">
+                    <div class="reco-icon warning"><i class="ti ti-alert-circle"></i></div>
+                    <div>
+                        <div class="reco-text-title">Valeurs manquantes détectées</div>
+                        <p class="reco-text-desc">
+                            {{ missing_values }} cellule(s) vide(s) ont été détectées. Vérifiez les colonnes
+                            concernées et complétez les données manquantes avant de procéder à l'analyse KPI.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if duplicates is defined and duplicates > 0 %}
+                <div class="reco-item danger">
+                    <div class="reco-icon danger"><i class="ti ti-copy"></i></div>
+                    <div>
+                        <div class="reco-text-title">Doublons à supprimer</div>
+                        <p class="reco-text-desc">
+                            {{ duplicates }} ligne(s) dupliquée(s) ont été identifiées. Ces doublons peuvent fausser
+                            les calculs de KPI et les revenus. Supprimez-les avant de lancer l'analyse.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if negative_amounts is defined and negative_amounts > 0 %}
+                <div class="reco-item danger">
+                    <div class="reco-icon danger"><i class="ti ti-trending-down"></i></div>
+                    <div>
+                        <div class="reco-text-title">Montants négatifs anormaux</div>
+                        <p class="reco-text-desc">
+                            {{ negative_amounts }} transaction(s) avec un montant négatif ont été trouvées.
+                            Vérifiez s'il s'agit de remboursements légitimes ou d'erreurs de saisie à corriger.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if (missing_values is not defined or missing_values == 0)
+                   and (duplicates is not defined or duplicates == 0)
+                   and (negative_amounts is not defined or negative_amounts == 0) %}
+                <div class="reco-item success">
+                    <div class="reco-icon success"><i class="ti ti-circle-check"></i></div>
+                    <div>
+                        <div class="reco-text-title">Données de bonne qualité</div>
+                        <p class="reco-text-desc">
+                            Aucune anomalie majeure détectée. Vos données sont prêtes pour le calcul des KPI
+                            et la génération des tableaux de bord.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="reco-item">
+                    <div class="reco-icon warning"><i class="ti ti-info-circle"></i></div>
+                    <div>
+                        <div class="reco-text-title">Conseil général</div>
+                        <p class="reco-text-desc">
+                            Assurez-vous que les colonnes <strong>Montant</strong>, <strong>Statut</strong> et
+                            <strong>Date</strong> respectent un format homogène avant chaque importation
+                            pour garantir la fiabilité des indicateurs.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

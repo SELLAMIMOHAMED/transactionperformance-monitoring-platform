@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>KPI - Performance</title>
+
+    <style>
+
+        body{
+            font-family: Arial, sans-serif;
+            background:#f5f7fb;
+            margin:0;
+            padding:30px;
+        }
+
+        h1{
+            margin-bottom:30px;
+            color:#1f2937;
+        }
+
+        .kpi-container{
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+            gap:20px;
+        }
+
+        .kpi-card{
+            background:white;
+            border-radius:20px;
+            padding:25px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08);
+            text-align:center;
+        }
+
+        .kpi-value{
+            font-size:38px;
+            font-weight:bold;
+            color:#2563eb;
+            margin-bottom:10px;
+        }
+
+        .kpi-title{
+            color:#6b7280;
+            font-size:16px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>📊 Indicateurs de Performance</h1>
+
+    <div class="kpi-container">
+
+        <div class="kpi-card">
+            <div class="kpi-value">
+                {{ total_transactions }}
+            </div>
+            <div class="kpi-title">
+                Transactions
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-value">
+                {{ total_montant }}
+            </div>
+            <div class="kpi-title">
+                Montant Total (MAD)
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-value">
+                {{ total_revenue }}
+            </div>
+            <div class="kpi-title">
+                Revenue Total (MAD)
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-value">
+                {{ total_merchants }}
+            </div>
+            <div class="kpi-title">
+                Marchands Actifs
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-value">
+                {{ fraud_rate }} %
+            </div>
+            <div class="kpi-title">
+                Taux de Fraude
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

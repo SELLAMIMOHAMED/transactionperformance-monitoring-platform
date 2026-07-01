@@ -1,80 +1,483 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
+
 <head>
-    <title>Importation des données</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Importation — Plateforme de Suivi</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 
     <style>
+        * { box-sizing: border-box; }
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', sans-serif; margin: 0; }
 
-        body{
-            font-family: Arial;
-            padding:40px;
+        /* ===== SIDEBAR ===== */
+        .sidebar {
+            position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+            background: #ffffff; border-right: 1px solid #e8e8e8;
+            display: flex; flex-direction: column; z-index: 100;
         }
+        .sidebar-logo { padding: 18px 20px 14px; border-bottom: 1px solid #e8e8e8; }
+        .logo-badge { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; color: #1a1a1a; }
+        .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: #185FA5; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .logo-icon i { font-size: 17px; color: #E6F1FB; }
+        .sidebar-logo p { font-size: 11px; color: #888; margin-top: 5px; margin-bottom: 0; line-height: 1.4; }
+        .sidebar-section { padding: 14px 20px 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #aaa; }
+        .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin: 1px 8px; border-radius: 8px; font-size: 13.5px; color: #555; text-decoration: none; transition: background 0.15s, color 0.15s; }
+        .nav-item:hover { background: #f4f6f9; color: #1a1a1a; text-decoration: none; }
+        .nav-item.active { background: #E6F1FB; color: #185FA5; font-weight: 500; }
+        .nav-item i { font-size: 18px; flex-shrink: 0; }
+        .sidebar-bottom { margin-top: auto; padding: 12px; border-top: 1px solid #e8e8e8; }
+        .user-row { display: flex; align-items: center; margin-bottom: 12px; gap: 10px; padding: 8px 10px; border-radius: 8px; text-decoration: none; transition: background 0.15s; }
+        .user-row:hover { background: #f4f6f9; }
+        .avatar { width: 34px; height: 34px; border-radius: 50%; background: #E6F1FB; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #185FA5; flex-shrink: 0; }
+        .user-info { flex: 1; }
+        .user-info .user-name { font-size: 13px; font-weight: 500; color: #1a1a1a; margin: 0; }
+        .user-info .user-role { font-size: 11px; color: #999; }
+        .logout-row { background: #ffffff; border: 1px solid #185FA5; color: #185FA5; justify-content: center; }
+        .logout-row:hover { background: #bbbbbb; border: 1px solid #ffffff; }
 
-        .card{
-            border:1px solid #ddd;
-            padding:20px;
-            margin-bottom:20px;
-            border-radius:10px;
-        }
+        /* ===== MAIN ===== */
+        .main-wrapper { margin-left: 240px; min-height: 100vh; display: flex; flex-direction: column; }
 
+        /* ===== TOPBAR ===== */
+        .topbar { background: #ffffff; border-bottom: 1px solid #e8e8e8; padding: 0 28px; height: 58px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; position: sticky; top: 0; z-index: 50; }
+        .topbar-title { font-size: 15px; font-weight: 600; color: #1a1a1a; margin: 0; }
+        .topbar-sub { font-size: 12px; color: #999; }
+        .btn-topbar { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid #d5d5d5; background: transparent; color: #555; transition: background 0.15s; text-decoration: none; }
+        .btn-topbar.primary { background: #185FA5; border-color: #185FA5; color: #ffffff; }
+        .btn-topbar.primary:hover { background: #0e4a82; color: #fff; }
+        .btn-topbar i { font-size: 16px; }
+
+        /* ===== CONTENT ===== */
+        .content { padding: 28px; flex: 1; }
+
+        /* ===== BANNER ===== */
+        .welcome-banner { background: #185FA5; border-radius: 14px; padding: 26px 30px; margin-bottom: 26px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+        .welcome-banner h2 { font-size: 19px; font-weight: 600; color: #E6F1FB; margin-bottom: 5px; }
+        .welcome-banner p { font-size: 13px; color: #B5D4F4; margin: 0; }
+        .btn-white { display: flex; align-items: center; gap: 7px; background: #ffffff; color: #185FA5; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; border: none; white-space: nowrap; text-decoration: none; transition: background 0.15s; cursor: pointer; }
+        .btn-white:hover { background: #E6F1FB; color: #185FA5; text-decoration: none; }
+        .btn-white i { font-size: 16px; }
+
+        /* ===== KPI GRID ===== */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
+        .kpi-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 18px 20px; }
+        .kpi-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .kpi-label { font-size: 12px; color: #888; font-weight: 500; }
+        .kpi-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .kpi-icon i { font-size: 17px; }
+        .kpi-icon.blue   { background: #E6F1FB; } .kpi-icon.blue   i { color: #185FA5; }
+        .kpi-icon.green  { background: #EAF3DE; } .kpi-icon.green  i { color: #3B6D11; }
+        .kpi-icon.amber  { background: #FAEEDA; } .kpi-icon.amber  i { color: #854F0B; }
+        .kpi-icon.purple { background: #EEEDFE; } .kpi-icon.purple i { color: #534AB7; }
+        .kpi-value { font-size: 24px; font-weight: 600; color: #1a1a1a; }
+        .kpi-value.kpi-small { font-size: 14px; font-weight: 600; line-height: 1.4; word-break: break-all; }
+        .kpi-sub { font-size: 11px; color: #aaa; margin-top: 3px; }
+
+        /* ===== SECTION TITLE ===== */
+        .section-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin-bottom: 16px; }
+
+        /* ===== ZONE IMPORT ===== */
+        .import-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; margin-bottom: 26px; }
+        .dropzone { border: 2px dashed #c5d8ee; border-radius: 10px; background: #f7fafd; padding: 48px 24px; text-align: center; transition: border-color 0.2s, background 0.2s; }
+        .dropzone.drag-over { border-color: #185FA5; background: #E6F1FB; }
+        .dropzone-icon { font-size: 2.6rem; color: #185FA5; display: block; margin-bottom: 12px; }
+        .dropzone-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0 0 4px; }
+        .dropzone-sub { font-size: 12px; color: #777; margin: 0 0 6px; }
+        .dropzone-hint { font-size: 11px; color: #aaa; margin: 0; }
+        .dropzone-actions { display: flex; gap: 10px; justify-content: center; margin-top: 18px; flex-wrap: wrap; }
+        .btn-choose { background: #fff; border: 1px solid #d5d5d5; color: #555; border-radius: 8px; padding: 7px 16px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: border-color 0.15s; }
+        .btn-choose:hover { border-color: #185FA5; color: #185FA5; }
+        .btn-import { background: #185FA5; border: none; color: #fff; border-radius: 8px; padding: 7px 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+        .btn-import:hover { background: #0e4a82; }
+        .filename-badge { margin-top: 14px; font-size: 12px; color: #333; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+        .filename-badge i { color: #3B6D11; }
+
+        /* ===== NETTOYAGE ===== */
+        .clean-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; margin-bottom: 26px; }
+        .clean-options { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+        .clean-option { flex: 1; min-width: 180px; border: 1px solid #e8e8e8; border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; background: #f8f9fb; }
+        .clean-option:hover { border-color: #185FA5; background: #f0f6fc; }
+        .clean-option input[type="checkbox"] { display: none; }
+        .clean-option.selected { border-color: #185FA5; background: #E6F1FB; }
+        .clean-option-icon { width: 34px; height: 34px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .clean-option-icon.amber { background: #FAEEDA; } .clean-option-icon.amber i { color: #854F0B; }
+        .clean-option-icon.purple { background: #EEEDFE; } .clean-option-icon.purple i { color: #534AB7; }
+        .clean-option-icon.red { background: #FAECEC; } .clean-option-icon.red i { color: #993C1D; }
+        .clean-option-icon i { font-size: 17px; }
+        .clean-option-check { width: 18px; height: 18px; border: 2px solid #d5d5d5; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-left: auto; flex-shrink: 0; transition: all 0.15s; }
+        .clean-option.selected .clean-option-check { background: #185FA5; border-color: #185FA5; }
+        .clean-option.selected .clean-option-check::after { content: '✓'; font-size: 11px; color: #fff; font-weight: 700; }
+        .clean-option-label { font-size: 13px; font-weight: 500; color: #1a1a1a; }
+        .clean-option-sub { font-size: 11px; color: #aaa; margin-top: 1px; }
+        .clean-footer { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
+        .clean-info { font-size: 12px; color: #888; display: flex; align-items: center; gap: 6px; }
+        .clean-actions { display: flex; gap: 10px; }
+        .btn-clean { background: #185FA5; border: none; color: #fff; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; }
+        .btn-clean:hover { background: #0e4a82; }
+        .btn-export { background: #fff; border: 1px solid #3B6D11; color: #3B6D11; border-radius: 8px; padding: 8px 20px; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: background 0.15s; text-decoration: none; }
+        .btn-export:hover { background: #EAF3DE; color: #3B6D11; }
+
+        /* Message de succès nettoyage */
+        .clean-message { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 16px; background: #EAF3DE; border: 1px solid #C6E5A8; color: #3B6D11; }
+        .clean-message i { font-size: 18px; }
+
+        /* ===== APERÇU TABLE ===== */
+        .preview-card { background: #ffffff; border: 1px solid #e8e8e8; border-radius: 12px; padding: 22px 24px; }
+        .preview-table { font-size: 12px; }
+        .preview-table thead th { background: #f8f9fb; color: #555; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; border-color: #e8e8e8; white-space: nowrap; }
+        .preview-table tbody td { border-color: #f0f0f0; }
+        .preview-note { font-size: 11px; color: #aaa; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state { text-align: center; padding: 52px 24px; }
+        .empty-icon { width: 72px; height: 72px; border-radius: 50%; background: #E6F1FB; color: #185FA5; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        .empty-title { font-size: 14px; font-weight: 600; color: #1a1a1a; margin: 0 0 6px; }
+        .empty-desc { font-size: 12px; color: #888; max-width: 320px; margin: 0 auto 18px; line-height: 1.6; }
+
+        /* ===== DISABLED STATE ===== */
+        .clean-card.disabled { opacity: 0.5; pointer-events: none; }
     </style>
-
 </head>
+
 <body>
 
-<h1>Importation des données</h1>
+<!-- ========== SIDEBAR ========== -->
+<div class="sidebar">
 
-<div class="card">
+    <div class="sidebar-logo">
+        <div class="logo-badge">
+            <div class="logo-icon"><i class="ti ti-chart-bar"></i></div>
+            Suivi & Analyse
+        </div>
+        <p>Performance des transactions</p>
+    </div>
 
-    <form method="POST" enctype="multipart/form-data">
+    <div class="sidebar-section">Navigation</div>
 
-        <input
-            type="file"
-            name="file"
-            required
-        >
+    <a href="/home" class="nav-item">
+        <i class="ti ti-home"></i> Accueil
+    </a>
 
-        <button type="submit">
-            Importer
-        </button>
+    {% if session.role == "admin" %}
+    <a href="/import" class="nav-item active">
+        <i class="ti ti-upload"></i> Importation
+    </a>
+    {% endif %}
 
-    </form>
+    {% if session.role in ["admin", "analyste"] %}
+    <a href="/quality" class="nav-item">
+        <i class="ti ti-shield-check"></i> Contrôle qualité
+    </a>
+    <a href="/kpi" class="nav-item">
+        <i class="ti ti-chart-pie"></i> KPI
+    </a>
+    {% endif %}
+
+    <a href="/dashboard" class="nav-item">
+        <i class="ti ti-layout-dashboard"></i> Dashboard
+    </a>
+
+    {% if session.role == "admin" %}
+    <a href="/reporting" class="nav-item">
+        <i class="ti ti-file-text"></i> Reporting PDF
+    </a>
+    {% endif %}
+
+    <div class="sidebar-bottom">
+        {% if session.get("username") %}
+        <a href="/info" class="user-row">
+            <div class="avatar">{{ session.username[:2].upper() }}</div>
+            <div class="user-info">
+                <p class="user-name">{{ session.username }}</p>
+                <span class="user-role">
+                    {% if session.role == "admin" %}Administrateur
+                    {% elif session.role == "analyste" %}Analyste
+                    {% elif session.role == "manager" %}Manager
+                    {% else %}Utilisateur{% endif %}
+                </span>
+            </div>
+        </a>
+        {% endif %}
+        <a href="/logout" class="nav-item logout-row">
+            <i class="ti ti-logout"></i> Déconnexion
+        </a>
+    </div>
 
 </div>
 
-{% if file_name %}
+<!-- ========== MAIN ========== -->
+<div class="main-wrapper">
 
-<div class="card">
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div>
+            <p class="topbar-title">Importation des données</p>
+            <span class="topbar-sub">Importez un fichier Excel ou CSV pour démarrer l'analyse</span>
+        </div>
+    </div>
 
-    <h3>Informations du fichier</h3>
+    <div class="content">
 
-    <p>
-        <strong>Nom du fichier :</strong>
-        {{ file_name }}
-    </p>
+        <!-- BANNER -->
+        <div class="welcome-banner">
+            <div>
+                <h2>Importation des données</h2>
+                <p>Importez un fichier Excel (.xlsx) ou CSV (.csv) afin de lancer le processus d'analyse et de suivi des performances des transactions.</p>
+            </div>
+            <label for="fileTrigger" class="btn-white">
+                <i class="ti ti-upload"></i> Choisir un fichier
+            </label>
+        </div>
 
-    <p>
-        <strong>Nombre de lignes :</strong>
-        {{ rows }}
-    </p>
+        <!-- KPI CARDS -->
+        <div class="kpi-grid">
 
-    <p>
-        <strong>Nombre de colonnes :</strong>
-        {{ cols }}
-    </p>
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Nom du fichier</span>
+                    <div class="kpi-icon blue"><i class="ti ti-file-description"></i></div>
+                </div>
+                <div class="kpi-value kpi-small">{{ file_name if file_name is defined and file_name else '—' }}</div>
+                <div class="kpi-sub">Fichier importé</div>
+            </div>
 
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Type de fichier</span>
+                    <div class="kpi-icon green"><i class="ti ti-file-spreadsheet"></i></div>
+                </div>
+                <div class="kpi-value kpi-small">
+                    {% if file_name is defined and file_name %}
+                        {% if file_name.endswith('.xlsx') %}Excel (.xlsx)
+                        {% elif file_name.endswith('.csv') %}CSV (.csv)
+                        {% else %}{{ file_name.split('.')[-1]|upper }}{% endif %}
+                    {% else %}—{% endif %}
+                </div>
+                <div class="kpi-sub">Format détecté</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Nombre de lignes</span>
+                    <div class="kpi-icon amber"><i class="ti ti-table-row"></i></div>
+                </div>
+                <div class="kpi-value">{{ rows if rows is defined and rows else '—' }}</div>
+                <div class="kpi-sub">Lignes dans le fichier importé</div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Nombre de colonnes</span>
+                    <div class="kpi-icon purple"><i class="ti ti-columns"></i></div>
+                </div>
+                <div class="kpi-value">{{ cols if cols is defined and cols else '—' }}</div>
+                <div class="kpi-sub">Colonnes détectées</div>
+            </div>
+
+        </div>
+
+        <!-- ZONE D'IMPORTATION -->
+        <div class="section-title">Zone d'importation</div>
+        <div class="import-card">
+            <form method="POST" enctype="multipart/form-data" id="importForm">
+                <div class="dropzone" id="dropZone">
+                    <i class="ti ti-cloud-upload dropzone-icon"></i>
+                    <p class="dropzone-title">Glissez votre fichier ici</p>
+                    <p class="dropzone-sub">ou utilisez le bouton ci-dessous pour parcourir vos fichiers</p>
+                    <p class="dropzone-hint">
+                        <i class="ti ti-info-circle"></i>
+                        Formats acceptés : <strong>.xlsx</strong>, <strong>.csv</strong> — Taille max : 50 MB
+                    </p>
+                    <div class="dropzone-actions">
+                        <label for="fileInput" class="btn-choose">
+                            <i class="ti ti-folder"></i> Parcourir…
+                        </label>
+                        <button type="submit" class="btn-import">
+                            <i class="ti ti-upload"></i> Importer
+                        </button>
+                    </div>
+                    <input type="file" name="file" id="fileInput"
+                           accept=".xlsx,.csv" class="d-none"
+                           onchange="showFileName(this)">
+                    <input type="file" id="fileTrigger"
+                           accept=".xlsx,.csv" class="d-none"
+                           onchange="syncToMain(this)">
+                    <div id="fileNameBadge" class="filename-badge d-none">
+                        <i class="ti ti-file-check"></i>
+                        <span id="fileNameText"></span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- ===== NETTOYAGE DES DONNÉES ===== -->
+        <div class="section-title">Nettoyage des données</div>
+        <div class="clean-card {% if not file_name %}disabled{% endif %}">
+
+            {% if message %}
+            <div class="clean-message">
+                <i class="ti ti-circle-check"></i>
+                {{ message }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/clean" id="cleanForm">
+
+                <div class="clean-options">
+
+                    <!-- Doublons -->
+                    <label class="clean-option" id="opt-duplicates">
+                        <input type="checkbox" name="remove_duplicates" id="chk-duplicates">
+                        <div class="clean-option-icon amber">
+                            <i class="ti ti-copy"></i>
+                        </div>
+                        <div>
+                            <div class="clean-option-label">Supprimer les doublons</div>
+                            <div class="clean-option-sub">Lignes identiques détectées</div>
+                        </div>
+                        <div class="clean-option-check"></div>
+                    </label>
+
+                    <!-- Valeurs manquantes -->
+                    <label class="clean-option" id="opt-missing">
+                        <input type="checkbox" name="remove_missing" id="chk-missing">
+                        <div class="clean-option-icon purple">
+                            <i class="ti ti-alert-circle"></i>
+                        </div>
+                        <div>
+                            <div class="clean-option-label">Supprimer les valeurs manquantes</div>
+                            <div class="clean-option-sub">Cellules vides à retirer</div>
+                        </div>
+                        <div class="clean-option-check"></div>
+                    </label>
+
+                    <!-- Montants négatifs -->
+                    <label class="clean-option" id="opt-negative">
+                        <input type="checkbox" name="remove_negative" id="chk-negative">
+                        <div class="clean-option-icon red">
+                            <i class="ti ti-trending-down"></i>
+                        </div>
+                        <div>
+                            <div class="clean-option-label">Supprimer les montants négatifs</div>
+                            <div class="clean-option-sub">Transactions à montant invalide</div>
+                        </div>
+                        <div class="clean-option-check"></div>
+                    </label>
+
+                </div>
+
+                <div class="clean-footer">
+                    <div class="clean-info">
+                        <i class="ti ti-info-circle"></i>
+                        {% if file_name is defined and file_name %}
+                            Nombre actuel de lignes : <strong>{{ total_rows if total_rows is defined else rows }}</strong>
+                        {% else %}
+                            Importez d'abord un fichier pour activer le nettoyage.
+                        {% endif %}
+                    </div>
+                    <div class="clean-actions">
+                        <a href="/export-clean" class="btn-export">
+                            <i class="ti ti-download"></i> Exporter les données nettoyées
+                        </a>
+                        <button type="submit" class="btn-clean">
+                            <i class="ti ti-sparkles"></i> Nettoyer les données
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- APERÇU DES DONNÉES / ÉTAT VIDE -->
+        <div class="section-title">Aperçu des données importées</div>
+        <div class="preview-card">
+
+            {% if file_name is defined and file_name %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle preview-table">
+                        {{ data|safe }}
+                    </table>
+                </div>
+                <p class="preview-note">
+                    <i class="ti ti-info-circle"></i>
+                    Affichage des 10 premières lignes sur <strong>{{ rows }}</strong> au total.
+                </p>
+
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="ti ti-inbox"></i>
+                    </div>
+                    <p class="empty-title">Aucun fichier importé</p>
+                    <p class="empty-desc">
+                        Veuillez sélectionner un fichier Excel ou CSV pour commencer l'analyse.
+                    </p>
+                    <label for="fileInput" class="btn-import">
+                        <i class="ti ti-upload"></i> Importer un fichier
+                    </label>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
 </div>
 
-<div class="card">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    /* ── Bouton bannière → synchronise l'input du formulaire ── */
+    function syncToMain(trigger) {
+        if (!trigger.files.length) return;
+        const main = document.getElementById('fileInput');
+        const dt = new DataTransfer();
+        dt.items.add(trigger.files[0]);
+        main.files = dt.files;
+        showFileName(main);
+    }
 
-    <h3>Aperçu des données</h3>
+    /* ── Affiche le nom sous la dropzone ── */
+    function showFileName(input) {
+        const badge = document.getElementById('fileNameBadge');
+        const text  = document.getElementById('fileNameText');
+        if (input.files && input.files.length > 0) {
+            text.textContent = input.files[0].name;
+            badge.classList.remove('d-none');
+        } else {
+            badge.classList.add('d-none');
+        }
+    }
 
-    {{ data|safe }}
+    /* ── Drag & drop ── */
+    const dz = document.getElementById('dropZone');
+    if (dz) {
+        dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+        dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+        dz.addEventListener('drop', e => {
+            e.preventDefault();
+            dz.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                const inp = document.getElementById('fileInput');
+                inp.files = dt.files;
+                showFileName(inp);
+            }
+        });
+    }
 
-</div>
-
-{% endif %}
-
+    /* ── Cases à cocher stylisées ── */
+    document.querySelectorAll('.clean-option').forEach(option => {
+        option.addEventListener('click', () => {
+            const chk = option.querySelector('input[type="checkbox"]');
+            chk.checked = !chk.checked;
+            option.classList.toggle('selected', chk.checked);
+        });
+    });
+</script>
 
 </body>
 </html>
