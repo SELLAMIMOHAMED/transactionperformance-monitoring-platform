@@ -3,105 +3,583 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KPI - Performance</title>
 
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tabler Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body{
-            font-family: Arial, sans-serif;
-            background:#f5f7fb;
-            margin:0;
-            padding:30px;
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            min-height: 100vh;
         }
 
-        h1{
-            margin-bottom:30px;
-            color:#1f2937;
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: #ffffff;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
         }
 
-        .kpi-container{
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-            gap:20px;
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 22px 24px 18px;
+            border-bottom: 1px solid #f0f0f0;
         }
 
-        .kpi-card{
-            background:white;
-            border-radius:20px;
-            padding:25px;
-            box-shadow:0 2px 10px rgba(0,0,0,0.08);
-            text-align:center;
+        .sidebar-brand .brand-icon {
+            width: 40px; height: 40px;
+            background: #185FA5;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-size: 18px;
         }
 
-        .kpi-value{
-            font-size:38px;
-            font-weight:bold;
-            color:#2563eb;
-            margin-bottom:10px;
+        .sidebar-brand .brand-text .title {
+            font-size: 14px; font-weight: 700; color: #1e293b;
+        }
+        .sidebar-brand .brand-text .subtitle {
+            font-size: 11px; color: #94a3b8;
         }
 
-        .kpi-title{
-            color:#6b7280;
-            font-size:16px;
+        .sidebar-nav-label {
+            font-size: 10px; font-weight: 700; color: #94a3b8;
+            letter-spacing: 1px; text-transform: uppercase;
+            padding: 20px 24px 8px;
         }
 
+        .sidebar-nav a {
+            display: flex; align-items: center; gap: 12px;
+            padding: 11px 24px;
+            text-decoration: none;
+            color: #64748b;
+            font-size: 14px;
+            border-radius: 0;
+            transition: all 0.18s;
+        }
+
+        .sidebar-nav a:hover { background: #f8fafc; color: #185FA5; }
+
+        .sidebar-nav a.active {
+            background: #EBF3FC;
+            color: #185FA5;
+            font-weight: 600;
+            border-left: 3px solid #185FA5;
+        }
+
+        .sidebar-nav a i { font-size: 18px; }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 20px 24px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .user-info {
+            display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+        }
+
+        .user-avatar {
+            width: 36px; height: 36px;
+            background: #185FA5;
+            border-radius: 50%;
+            color: white; font-size: 13px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .user-name { font-size: 13px; font-weight: 600; color: #1e293b; }
+        .user-role { font-size: 11px; color: #94a3b8; }
+
+        .btn-logout {
+            display: flex; align-items: center; gap: 8px;
+            width: 100%; padding: 9px 14px;
+            background: white; border: 1px solid #e5e7eb;
+            border-radius: 8px; color: #64748b;
+            font-size: 13px; cursor: pointer;
+            text-decoration: none;
+            transition: all 0.18s;
+        }
+        .btn-logout:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+
+        /* ── TOPBAR ── */
+        .topbar {
+            position: fixed;
+            top: 0; left: 260px; right: 0;
+            height: 64px;
+            background: #185FA5;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px;
+            z-index: 99;
+        }
+
+        .topbar-left .page-title {
+            font-size: 17px; font-weight: 600; color: white;
+        }
+        .topbar-left .page-sub {
+            font-size: 12px; color: rgba(255,255,255,0.7);
+        }
+
+        .btn-import {
+            display: flex; align-items: center; gap: 8px;
+            background: white; color: #185FA5;
+            border: none; border-radius: 10px;
+            padding: 9px 18px; font-size: 13px; font-weight: 600;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.18s;
+        }
+        .btn-import:hover { background: #f0f4f8; color: #185FA5; }
+
+        /* ── MAIN CONTENT ── */
+        .main-content {
+            margin-left: 260px;
+            margin-top: 64px;
+            padding: 32px;
+            flex: 1;
+            width: calc(100% - 260px);
+        }
+
+        /* ── KPI CARDS ── */
+        .kpi-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            display: flex; align-items: center; gap: 18px;
+            transition: box-shadow 0.2s;
+        }
+        .kpi-card:hover { box-shadow: 0 4px 16px rgba(24,95,165,0.12); }
+
+        .kpi-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; flex-shrink: 0;
+        }
+
+        .kpi-icon.blue   { background: #EBF3FC; color: #185FA5; }
+        .kpi-icon.green  { background: #E6F7F1; color: #0F6E56; }
+        .kpi-icon.amber  { background: #FEF3E2; color: #B45309; }
+        .kpi-icon.purple { background: #F0EFFE; color: #6D28D9; }
+        .kpi-icon.red    { background: #FEE9E9; color: #DC2626; }
+
+        .kpi-info { flex: 1; }
+        .kpi-label { font-size: 12px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 26px; font-weight: 700; color: #1e293b; margin: 2px 0; line-height: 1.1; }
+        .kpi-value span { font-size: 13px; font-weight: 500; color: #94a3b8; }
+        .kpi-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            font-size: 11px; font-weight: 600; padding: 3px 8px;
+            border-radius: 20px; margin-top: 2px;
+        }
+        .badge-blue   { background: #EBF3FC; color: #185FA5; }
+        .badge-green  { background: #E6F7F1; color: #0F6E56; }
+        .badge-red    { background: #FEE9E9; color: #DC2626; }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-size: 15px; font-weight: 700; color: #1e293b;
+            display: flex; align-items: center; gap: 8px;
+            margin-bottom: 16px;
+        }
+        .section-title i { color: #185FA5; font-size: 18px; }
+
+        /* ── CHART CARD ── */
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+
+        /* ── SYNTHESE TABLE ── */
+        .synth-table { width: 100%; border-collapse: collapse; }
+        .synth-table th {
+            font-size: 11px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 10px 14px; text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .synth-table td {
+            padding: 12px 14px; font-size: 14px; color: #1e293b;
+            border-bottom: 1px solid #f8f8f8;
+        }
+        .synth-table tr:last-child td { border-bottom: none; }
+        .synth-table tr:hover td { background: #f8fafc; }
+
+        .metric-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            display: inline-block; margin-right: 8px;
+        }
+
+        /* ── ALERT BANNER ── */
+        .alert-fraud {
+            background: #FEF2F2;
+            border: 1px solid #FECACA;
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex; align-items: center; gap: 12px;
+            color: #991B1B; font-size: 14px;
+        }
+        .alert-fraud i { font-size: 20px; color: #DC2626; }
+
+        .alert-ok {
+            background: #F0FDF4;
+            border: 1px solid #BBF7D0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex; align-items: center; gap: 12px;
+            color: #166534; font-size: 14px;
+        }
+        .alert-ok i { font-size: 20px; color: #16A34A; }
+
+        /* Rendement par transaction */
+        .rdmt-value {
+            font-size: 32px; font-weight: 700; color: #185FA5;
+            text-align: center; padding: 12px 0;
+        }
+        .rdmt-label {
+            text-align: center; font-size: 12px; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .divider-v {
+            border-left: 1px solid #f0f0f0;
+            height: 60px; align-self: center;
+        }
     </style>
-
 </head>
 
 <body>
 
-    <h1>📊 Indicateurs de Performance</h1>
-
-    <div class="kpi-container">
-
-        <div class="kpi-card">
-            <div class="kpi-value">
-                {{ total_transactions }}
-            </div>
-            <div class="kpi-title">
-                Transactions
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon"><i class="ti ti-chart-bar"></i></div>
+            <div class="brand-text">
+                <div class="title">Suivi &amp; Analyse</div>
+                <div class="subtitle">Performance des transactions</div>
             </div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-value">
-                {{ total_montant }}
+        <div class="sidebar-nav-label">Navigation</div>
+        <nav class="sidebar-nav">
+            <a href="/home"><i class="ti ti-home"></i> Accueil</a>
+            <a href="/import"><i class="ti ti-upload"></i> Importation</a>
+            <a href="/quality"><i class="ti ti-shield-check"></i> Contrôle qualité</a>
+            <a href="/kpi" class="active"><i class="ti ti-trending-up"></i> KPI</a>
+            <a href="/dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+            <a href="/reporting"><i class="ti ti-file-description"></i> Reporting PDF</a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
+                <div>
+                    <div class="user-name">admin</div>
+                    <div class="user-role">Administrateur</div>
+                </div>
             </div>
-            <div class="kpi-title">
-                Montant Total (MAD)
+            <a href="/logout" class="btn-logout">
+                <i class="ti ti-logout"></i> Déconnexion
+            </a>
+        </div>
+    </aside>
+
+    <!-- ══ TOPBAR ══ -->
+    <header class="topbar">
+        <div class="topbar-left">
+            <div class="page-title">Indicateurs de Performance (KPI)</div>
+            <div class="page-sub">Vue d'ensemble des métriques clés</div>
+        </div>
+        <a href="/import" class="btn-import">
+            <i class="ti ti-upload"></i> Importer des données
+        </a>
+    </header>
+
+    <!-- ══ MAIN ══ -->
+    <main class="main-content">
+
+        <!-- Alerte fraude -->
+        <div class="mb-4">
+            {% if fraud_rate > 5 %}
+            <div class="alert-fraud">
+                <i class="ti ti-alert-triangle"></i>
+                <div>
+                    <strong>Attention :</strong> Le taux de fraude est élevé ({{ fraud_rate }}%). Une investigation est recommandée.
+                </div>
+            </div>
+            {% else %}
+            <div class="alert-ok">
+                <i class="ti ti-circle-check"></i>
+                <div>
+                    <strong>Tout va bien :</strong> Les indicateurs de performance sont dans les normes.
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ── KPI CARDS ROW ── -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-md-6 col-xl-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue"><i class="ti ti-receipt"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Total Transactions</div>
+                        <div class="kpi-value">{{ total_transactions }}</div>
+                        <span class="kpi-badge badge-blue"><i class="ti ti-database"></i> Enregistrements</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon green"><i class="ti ti-currency-dollar"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Montant Total</div>
+                        <div class="kpi-value">{{ "{:,.0f}".format(total_montant) }} <span>MAD</span></div>
+                        <span class="kpi-badge badge-green"><i class="ti ti-trending-up"></i> Volume traité</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon amber"><i class="ti ti-coin"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Revenue Total</div>
+                        <div class="kpi-value">{{ "{:,.0f}".format(total_revenue) }} <span>MAD</span></div>
+                        <span class="kpi-badge badge-green"><i class="ti ti-chart-line"></i> Revenus générés</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon purple"><i class="ti ti-building-store"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Marchands Actifs</div>
+                        <div class="kpi-value">{{ total_merchants }}</div>
+                        <span class="kpi-badge badge-blue"><i class="ti ti-users"></i> Partenaires</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon red"><i class="ti ti-shield-x"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Taux de Fraude</div>
+                        <div class="kpi-value">{{ fraud_rate }} <span>%</span></div>
+                        {% if fraud_rate > 5 %}
+                        <span class="kpi-badge badge-red"><i class="ti ti-alert-triangle"></i> Élevé</span>
+                        {% else %}
+                        <span class="kpi-badge badge-green"><i class="ti ti-check"></i> Normal</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-xl-4">
+                <div class="kpi-card">
+                    <div class="kpi-icon blue"><i class="ti ti-calculator"></i></div>
+                    <div class="kpi-info">
+                        <div class="kpi-label">Rendement / Transaction</div>
+                        {% if total_transactions > 0 %}
+                        <div class="kpi-value">{{ "{:,.2f}".format(total_revenue / total_transactions) }} <span>MAD</span></div>
+                        {% else %}
+                        <div class="kpi-value">— <span>MAD</span></div>
+                        {% endif %}
+                        <span class="kpi-badge badge-blue"><i class="ti ti-math-function"></i> Moyenne</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── GRAPHIQUES ── -->
+        <div class="row g-3 mb-4">
+
+            <!-- Répartition Montant / Revenue -->
+            <div class="col-lg-5">
+                <div class="chart-card h-100">
+                    <div class="section-title">
+                        <i class="ti ti-chart-donut"></i> Répartition financière
+                    </div>
+                    <canvas id="chartDonut" height="220"></canvas>
+                </div>
+            </div>
+
+            <!-- Synthèse KPI -->
+            <div class="col-lg-7">
+                <div class="chart-card h-100">
+                    <div class="section-title">
+                        <i class="ti ti-list-details"></i> Synthèse des indicateurs
+                    </div>
+                    <table class="synth-table">
+                        <thead>
+                            <tr>
+                                <th>Indicateur</th>
+                                <th>Valeur</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="metric-dot" style="background:#185FA5"></span>Total transactions</td>
+                                <td><strong>{{ total_transactions }}</strong></td>
+                                <td><span class="kpi-badge badge-blue">Analysé</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="metric-dot" style="background:#0F6E56"></span>Montant total</td>
+                                <td><strong>{{ "{:,.2f}".format(total_montant) }} MAD</strong></td>
+                                <td><span class="kpi-badge badge-green">OK</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="metric-dot" style="background:#B45309"></span>Revenue total</td>
+                                <td><strong>{{ "{:,.2f}".format(total_revenue) }} MAD</strong></td>
+                                <td><span class="kpi-badge badge-green">OK</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="metric-dot" style="background:#6D28D9"></span>Marchands actifs</td>
+                                <td><strong>{{ total_merchants }}</strong></td>
+                                <td><span class="kpi-badge badge-blue">Actif</span></td>
+                            </tr>
+                            <tr>
+                                <td><span class="metric-dot" style="background:#DC2626"></span>Taux de fraude</td>
+                                <td><strong>{{ fraud_rate }} %</strong></td>
+                                <td>
+                                    {% if fraud_rate > 5 %}
+                                    <span class="kpi-badge badge-red"><i class="ti ti-alert-triangle"></i> Élevé</span>
+                                    {% else %}
+                                    <span class="kpi-badge badge-green"><i class="ti ti-check"></i> Normal</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="metric-dot" style="background:#185FA5"></span>Rendement / transaction</td>
+                                <td>
+                                    {% if total_transactions > 0 %}
+                                    <strong>{{ "{:,.2f}".format(total_revenue / total_transactions) }} MAD</strong>
+                                    {% else %}
+                                    <strong>—</strong>
+                                    {% endif %}
+                                </td>
+                                <td><span class="kpi-badge badge-blue">Calculé</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── GRAPHIQUE BARRES ── -->
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="section-title">
+                        <i class="ti ti-chart-bar"></i> Vue comparative des KPI financiers
+                    </div>
+                    <canvas id="chartBar" height="100"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-value">
-                {{ total_revenue }}
-            </div>
-            <div class="kpi-title">
-                Revenue Total (MAD)
-            </div>
-        </div>
+    </main>
 
-        <div class="kpi-card">
-            <div class="kpi-value">
-                {{ total_merchants }}
-            </div>
-            <div class="kpi-title">
-                Marchands Actifs
-            </div>
-        </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-        <div class="kpi-card">
-            <div class="kpi-value">
-                {{ fraud_rate }} %
-            </div>
-            <div class="kpi-title">
-                Taux de Fraude
-            </div>
-        </div>
+    <script>
+        const montant  = {{ total_montant }};
+        const revenue  = {{ total_revenue }};
+        const rdmt     = {{ total_transactions }} > 0
+                       ? (revenue / {{ total_transactions }})
+                       : 0;
 
-    </div>
+        /* ── DONUT ── */
+        new Chart(document.getElementById('chartDonut'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Montant Total', 'Revenue Total'],
+                datasets: [{
+                    data: [montant, revenue],
+                    backgroundColor: ['#185FA5', '#0F6E56'],
+                    borderWidth: 0,
+                    hoverOffset: 6
+                }]
+            },
+            options: {
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 13 }, padding: 16, color: '#64748b' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.parsed.toLocaleString('fr-MA') + ' MAD'
+                        }
+                    }
+                }
+            }
+        });
+
+        /* ── BAR ── */
+        new Chart(document.getElementById('chartBar'), {
+            type: 'bar',
+            data: {
+                labels: ['Montant Total (MAD)', 'Revenue Total (MAD)', 'Rendement / Tx (MAD)'],
+                datasets: [{
+                    label: 'Valeur',
+                    data: [montant, revenue, rdmt],
+                    backgroundColor: ['#185FA5', '#0F6E56', '#B45309'],
+                    borderRadius: 8,
+                    barThickness: 48
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ' ' + ctx.parsed.y.toLocaleString('fr-MA') + ' MAD'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f0f0f0' },
+                        ticks: { color: '#94a3b8', font: { size: 12 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#64748b', font: { size: 13 } }
+                    }
+                }
+            }
+        });
+    </script>
 
 </body>
-
 </html>

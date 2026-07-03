@@ -1,7 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import pandas as pd
+import sqlite3
 import os
 from datetime import datetime
+from database import create_database
+
+
 
 app = Flask(__name__)
 app.secret_key = "une_cle_secrete_tres_difficile"
@@ -133,7 +137,27 @@ def import_data():
                     df[col] = pd.to_numeric(df[col], errors="coerce")
 
             # ── Normalisation automatique des colonnes ──
+            # ── Normalisation automatique des colonnes ──
             global_df = normaliser_colonnes(df)
+
+# ===============================
+# Sauvegarde des données dans SQLite
+# ===============================
+            conn = sqlite3.connect("monitoring.db")
+
+            global_df.to_sql(
+              "transactions",
+              conn,
+              if_exists="replace",
+              index=False
+       )
+
+        conn.close()
+
+        print("Les données ont été enregistrées dans SQLite.")
+
+        rows = global_df.shape[0]
+        cols = global_df.shape[1]
             # Conversion automatique des colonnes numériques
         for col in ["montant", "revenue", "fraude"]:
 
@@ -365,5 +389,6 @@ def kpi():
 
 
 if __name__ == "__main__":
+    create_database()
     app.run(debug=True)
 
